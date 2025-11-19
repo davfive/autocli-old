@@ -97,7 +97,7 @@ jobs:
         # Use the dedicated PAT secret
         password: ${{ secrets.GH_PACKAGES_TOKEN }} 
         # CORRECT INDEX URL: This must point to the GitHub Packages PyPI index.
-        repository-url: https://pypi.pkg.github.com/${{ github.repository_owner }}
+        repository-url: https://pypi.pkg.github.com/${{ github.repository }}
         attestations: false
 
   deploy_pypi_test:
