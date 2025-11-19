@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel", "setuptools-scm[toml]>=6.2"]
+# Pin setuptools to 60.9.0 to avoid setuptools >=61 emitting License-File metadata
+requires = ["setuptools==60.9.0", "wheel", "setuptools-scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
