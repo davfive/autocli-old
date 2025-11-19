@@ -30,7 +30,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies (including testing extras)
-      run: python -m pip install -e .[testing]
+      run: pip install .[testing]
 
     - name: Run Pytest and Coverage
       run: python -m pytest --cov --cov-report=xml
