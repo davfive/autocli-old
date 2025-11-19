@@ -1,5 +1,6 @@
 # .github/workflows/deploy.yml
-name: Release Package to PyPI and GitHub Packages
+name: Python Package Deployment # Changed to a static pipeline name
+run-name: Release ${{ github.ref_name }} to PyPI and GitHub Packages
 
 on:
   push:
@@ -50,9 +51,7 @@ jobs:
         path: dist/
         
     - name: Suppress Token Warning and Publish to GitHub Packages
-      # We switch from 'uses' to 'run' and call the GHA executable directly
-      # using 'docker://' format, then pipe stderr through 'grep -v' to filter 
-      # out the specific warning text, which suppresses the visual alert.
+      # FIX: Added '/simple/' to the repository-url to prevent 404 Not Found error.
       run: |
         docker://ghcr.io/pypa/gh-action-pypi-publish:release/v1 \
           --repository-url "https://pypi.pkg.github.com/${{ github.repository_owner }}/simple/" \
