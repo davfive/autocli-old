@@ -1,19 +1,17 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ["setuptools>=61.0.0", "wheel", "setuptools-scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "autocli"
-version = "0.0.1" # Resetting to a pre-release development version
 description = "A dynamic argparse command loader for modular CLIs using __ separation."
 readme = "README.md"
-authors = [{name = "davfive", email = "davfive@gmail.com"}] # IMPORTANT: Update your email
+authors = [{name = "davfive", email = "davfive@gmail.com"}]
 license = {file = "LICENSE.txt"}
 requires-python = ">=3.8"
 keywords = ["cli", "argparse", "subcommands", "dynamic", "autocli"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -24,18 +22,21 @@ classifiers = [
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
+dynamic = ["version"] 
 
 [project.optional-dependencies]
 testing = [
     "pytest>=7.0.0", 
-    "pytest-cov" # For code coverage reporting
+    "pytest-cov"
 ]
 
+[tool.setuptools_scm]
+write_to = "src/autocli/_version.py" 
+
 [tool.setuptools.packages.find]
-where = ["src"] # Crucial: tells setuptools to look inside the 'src' directory
+where = ["src"]
 
 [tool.pytest.ini_options]
-# Look in the src/ directory since the package itself is not installed during the test job
 python_files = "test_*.py"
 testpaths = "tests" 
 xfail_strict = true

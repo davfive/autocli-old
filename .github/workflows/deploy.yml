@@ -46,6 +46,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      # CRITICAL: This is required for setuptools-scm to read the Git tags and determine the version.
+      with:
+        fetch-depth: 0 
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -53,9 +56,11 @@ jobs:
         python-version: '3.x'
 
     - name: Install build dependencies
-      run: python -m pip install build
+      # Explicitly install all required build backends and tools
+      run: python -m pip install build setuptools setuptools-scm wheel
 
     - name: Build distributions
+      # setuptools-scm will use the tag available due to fetch-depth: 0
       run: python -m build
 
     # Save the build artifacts (dist/*.whl, dist/*.tar.gz) for later jobs
@@ -92,7 +97,7 @@ jobs:
         # Required for GitHub Packages authentication
         user: __token__ 
         password: ${{ secrets.GITHUB_TOKEN }}
-        repository-url: https://pypi.pkg.github.com/${{ github.repository_owner }}/simple/
+        repository-url: https://pypi.pkg.github.com/${{ github.repository_owner }}
         attestations: false
         
   deploy_pypi_test:
