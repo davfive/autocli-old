@@ -55,7 +55,7 @@ jobs:
       # out the specific warning text, which suppresses the visual alert.
       run: |
         docker://ghcr.io/pypa/gh-action-pypi-publish:release/v1 \
-          --repository-url "https://pypi.pkg.github.com/${{ github.repository_owner }}/" \
+          --repository-url "https://pypi.pkg.github.com/${{ github.repository_owner }}/simple/" \
           --password "${{ secrets.GITHUB_TOKEN }}" \
           --attestations "false" \
           2>&1 | grep -v "POTENTIALLY INVALID TOKEN"
