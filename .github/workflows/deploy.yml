@@ -4,14 +4,14 @@ run-name: Release ${{ github.ref_name }} to PyPI and GitHub Packages
 on:
   push:
     tags:
-      - 'v*' # Trigger on any tag starting with 'v' (e.g., v0.1.0, v0.1.1)
+      - 'v*' # Trigger on any tag starting with 'v' (e.g., v0.1.0, vv0.1.1)
 
 jobs:
   test:
-    name: test with Python ${{ matrix.python-version }}
+    name: Test with Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false   # streamlined debugging with all failures
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"] 
 
@@ -34,7 +34,7 @@ jobs:
     - name: Upload Coverage Report
       uses: actions/upload-artifact@v4
       with:
-        name: coverage-report-${{ matrix.python-version }}
+        name: ${{ github.event.repository.name }}-${{ github.ref_name }}-coverage-report-python-${{ matrix.python-version }}
         path: coverage.xml
         # Ensures the step doesn't fail if the coverage file isn't created for some reason
         if-no-files-found: ignore 
@@ -48,7 +48,7 @@ jobs:
     - uses: actions/checkout@v4
       # CRITICAL: This is required for setuptools-scm to read the Git tags and determine the version.
       with:
-        fetch-depth: 0 
+        fetch-depth: 0
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -73,17 +73,16 @@ jobs:
   deploy_github_packages:
     name: Deploy to GitHub Packages
     runs-on: ubuntu-latest
-    needs: build # Runs immediately after the build job is successful
+    needs: build
 
-    # FIX: Add explicit write permission for packages
+    # CRITICAL: Ensure 'packages: write' permission is explicitly set
     permissions:
       contents: read
-      packages: write
+      packages: write 
 
     steps:
     - uses: actions/checkout@v4
 
-    # Download the built artifacts
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
@@ -91,21 +90,21 @@ jobs:
         path: dist/
         
     - name: 🚀 Publish to GitHub Packages (PyPI)
-      # FIX: Replaced the failing 'run: docker://...' block with the correct 'uses:' syntax
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        # Required for GitHub Packages authentication
+        # Use __token__ for the user/username
         user: __token__ 
-        password: ${{ secrets.GITHUB_TOKEN }}
-        repository-url: https://pypi.pkg.github.com/${{ github.repository_owner }}
+        # Use the dedicated PAT secret
+        password: ${{ secrets.GH_PACKAGES_TOKEN }} 
+        # CORRECT INDEX URL: This must point to the GitHub Packages PyPI index.
+        repository-url: https://github.com/${{ github.repository_owner }}/pypi/
         attestations: false
-        
+
   deploy_pypi_test:
     name: Deploy to TestPyPI (Gated)
     runs-on: ubuntu-latest
-    needs: deploy_github_packages # This will be skipped if deploy_github_packages fails
+    needs: deploy_github_packages
     
-    # CRITICAL: Manual Gate 1 - Requires approval before deploying to TestPyPI
     environment:
       name: DeployGate_PyPiTest 
       # MUST create environment in repo settings and enable 'Required reviewers'
@@ -130,7 +129,7 @@ jobs:
   deploy_pypi_prod:
     name: Deploy to PyPI Production (Gated)
     runs-on: ubuntu-latest
-    needs: deploy_pypi_test # This will be skipped if deploy_pypi_test fails or is skipped
+    needs: deploy_pypi_test # Ensures deployment only happens after TestPyPI succeeded
     
     # CRITICAL: Manual Gate 2 - Requires approval before deploying to PyPI Production
     environment:
@@ -140,7 +139,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    # Download the built artifacts
     - name: Download Artifacts
       uses: actions/download-artifact@v4
       with:
@@ -150,5 +148,7 @@ jobs:
     - name: Publish to PyPI (Production)
       uses: pypa/gh-action-pypi-publish@release/v1
       with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        # Note: No repository-url needed here as it defaults to production PyPI
+        # Using the correct secret for Production PyPI
+        password: ${{ secrets.PYPI_API_TOKEN }} 
         attestations: false
