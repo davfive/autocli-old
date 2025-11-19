@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "autocli"
-version = "0.1.0"
+version = "0.0.1" # Resetting to a pre-release development version
 description = "A dynamic argparse command loader for modular CLIs using __ separation."
 readme = "README.md"
 authors = [{name = "davfive", email = "davfive@gmail.com"}] # IMPORTANT: Update your email
@@ -25,5 +25,18 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 
+[project.optional-dependencies]
+testing = [
+    "pytest>=7.0.0", 
+    "pytest-cov" # For code coverage reporting
+]
+
 [tool.setuptools.packages.find]
 where = ["src"] # Crucial: tells setuptools to look inside the 'src' directory
+
+[tool.pytest.ini_options]
+# Look in the src/ directory since the package itself is not installed during the test job
+python_files = "test_*.py"
+testpaths = "tests" 
+xfail_strict = true
+addopts = "--cov=autocli --cov-report=term-missing --strict-markers"
